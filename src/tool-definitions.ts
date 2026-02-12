@@ -22,6 +22,33 @@ export const TOOL_DEFINITIONS = [
       properties: {},
     },
   },
+  // Hunting Queries - Countries & Regions
+  {
+    name: 'list_countries',
+    description: 'List all available countries, optionally filtered by search term (e.g., "France", "Germany")',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        search: {
+          type: 'string',
+          description: 'Optional search term to filter countries (e.g., "France", "United States")',
+        },
+      },
+    },
+  },
+  {
+    name: 'list_regions',
+    description: 'List all available regions, optionally filtered by search term (e.g., "Europe", "Asia")',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        search: {
+          type: 'string',
+          description: 'Optional search term to filter regions (e.g., "Europe", "Middle East")',
+        },
+      },
+    },
+  },
   // Hunting Queries - Reports
   {
     name: 'get_reports_by_sector',
@@ -193,6 +220,75 @@ export const TOOL_DEFINITIONS = [
         },
       },
       required: ['campaignId'],
+    },
+  },
+  // Hunting Queries - Generalized Filters
+  {
+    name: 'get_reports_by_filters',
+    description: 'Get reports by dynamic filters (sectors, countries, regions) with AND/OR logic. Supports complex queries like "reports containing Germany AND Health sector" or "reports containing Germany OR Health sector"',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        filters: {
+          type: 'object',
+          description: 'FilterGroup object with mode (and/or) and filters array. Example: {mode: "and", filters: [{key: "objects", values: ["id1", "id2"], operator: "eq"}], filterGroups: []}',
+        },
+        count: {
+          type: 'number',
+          description: 'Maximum number of reports to retrieve',
+          default: 25,
+        },
+        cursor: {
+          type: 'string',
+          description: 'Pagination cursor for retrieving next set of results',
+        },
+        orderBy: {
+          type: 'string',
+          description: 'Field to order results by (e.g., published, created)',
+          default: 'published',
+        },
+        orderMode: {
+          type: 'string',
+          description: 'Order mode: asc or desc',
+          enum: ['asc', 'desc'],
+          default: 'desc',
+        },
+      },
+      required: ['filters'],
+    },
+  },
+  {
+    name: 'get_campaigns_by_filters',
+    description: 'Get campaigns by dynamic filters (sectors, countries, regions) with AND/OR logic. Supports complex queries like "campaigns targeting Germany AND Health sector" or "campaigns targeting Germany OR Health sector"',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        filters: {
+          type: 'object',
+          description: 'FilterGroup object with mode (and/or) and filters array. Example: {mode: "and", filters: [{key: "regardingOf", operator: "eq", values: [{key: "relationship_type", values: ["targets"]}, {key: "id", values: ["id1", "id2"]}]}], filterGroups: []}',
+        },
+        count: {
+          type: 'number',
+          description: 'Maximum number of campaigns to retrieve',
+          default: 25,
+        },
+        cursor: {
+          type: 'string',
+          description: 'Pagination cursor for retrieving next set of results',
+        },
+        orderBy: {
+          type: 'string',
+          description: 'Field to order results by (e.g., created_at, name)',
+          default: 'created_at',
+        },
+        orderMode: {
+          type: 'string',
+          description: 'Order mode: asc or desc',
+          enum: ['asc', 'desc'],
+          default: 'desc',
+        },
+      },
+      required: ['filters'],
     },
   },
 ] as const;

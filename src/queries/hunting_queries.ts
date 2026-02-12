@@ -285,3 +285,126 @@ query GetIndicatorsByCampaign($count: Int!, $cursor: ID, $filters: FilterGroup, 
   }
 }
 `;
+
+export const GET_LIST_AVAILABLE_COUNTRIES_QUERY = `
+query ListAvailableCountries($search: String) {
+  countries(
+    search: $search
+    orderBy: name
+    orderMode: asc
+  ) {
+    edges {
+      node {
+        id
+        name
+        description
+        x_opencti_aliases
+      }
+    }
+  }
+}
+`;
+
+export const GET_LIST_AVAILABLE_REGIONS_QUERY = `
+query ListAvailableRegions($search: String) {
+  regions(
+    search: $search
+    orderBy: name
+    orderMode: asc
+  ) {
+    edges {
+      node {
+        id
+        name
+        description
+        x_opencti_aliases
+      }
+    }
+  }
+}
+`;
+
+export const GET_REPORTS_BY_FILTERS_QUERY = `
+query GetReportsByFilters($count: Int!, $cursor: ID, $filters: FilterGroup, $orderBy: ReportsOrdering, $orderMode: OrderingMode) {
+  reports(
+    first: $count
+    after: $cursor
+    filters: $filters
+    orderBy: $orderBy
+    orderMode: $orderMode
+  ) {
+    edges {
+      node {
+        id
+        name
+        description
+        published
+        report_types
+        confidence
+        createdBy {
+          id
+          name
+        }
+        objectMarking {
+          id
+          definition_type
+          definition
+        }
+        objectLabel {
+          id
+          value
+          color
+        }
+      }
+      cursor
+    }
+    pageInfo {
+      endCursor
+      hasNextPage
+      globalCount
+    }
+  }
+}
+`;
+
+export const GET_CAMPAIGNS_BY_FILTERS_QUERY = `
+query GetCampaignsByFilters($count: Int!, $cursor: ID, $filters: FilterGroup, $orderBy: CampaignsOrdering, $orderMode: OrderingMode) {
+  campaigns(
+    first: $count
+    after: $cursor
+    filters: $filters
+    orderBy: $orderBy
+    orderMode: $orderMode
+  ) {
+    edges {
+      node {
+        id
+        name
+        description
+        first_seen
+        last_seen
+        createdBy {
+          id
+          name
+        }
+        objectMarking {
+          id
+          definition_type
+          definition
+        }
+        objectLabel {
+          id
+          value
+          color
+        }
+      }
+      cursor
+    }
+    pageInfo {
+      endCursor
+      hasNextPage
+      globalCount
+    }
+  }
+}
+`;

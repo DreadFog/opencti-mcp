@@ -4,10 +4,14 @@ import { ToolArguments } from './types.js';
 import {
   GET_SECTORS_QUERY,
   GET_LIST_AVAILABLE_SECTORS_QUERY,
+  GET_LIST_AVAILABLE_COUNTRIES_QUERY,
+  GET_LIST_AVAILABLE_REGIONS_QUERY,
   GET_REPORTS_BY_SECTOR_QUERY,
   GET_REPORTS_BY_TYPE_QUERY,
   GET_REPORTS_TYPES_QUERY,
+  GET_REPORTS_BY_FILTERS_QUERY,
   GET_CAMPAIGNS_BY_SECTOR_QUERY,
+  GET_CAMPAIGNS_BY_FILTERS_QUERY,
   GET_INDICATORS_BY_MALWARE_WITH_TYPE_QUERY,
   GET_INDICATORS_BY_CAMPAIGN_QUERY,
   GET_MALARE_BY_NAME_QUERY,
@@ -67,6 +71,30 @@ export class RequestHandler {
     return this.executeQuery({
       query: GET_LIST_AVAILABLE_SECTORS_QUERY,
       variables: {},
+      formatter: (data) => data,
+    });
+  }
+
+  /**
+   * List all available countries
+   */
+  async listCountries(args: ToolArguments) {
+    console.error('[MCP] Fetching available countries' + (args.search ? ` with search: ${args.search}` : ''));
+    return this.executeQuery({
+      query: GET_LIST_AVAILABLE_COUNTRIES_QUERY,
+      variables: { search: args.search || null },
+      formatter: (data) => data,
+    });
+  }
+
+  /**
+   * List all available regions
+   */
+  async listRegions(args: ToolArguments) {
+    console.error('[MCP] Fetching available regions' + (args.search ? ` with search: ${args.search}` : ''));
+    return this.executeQuery({
+      query: GET_LIST_AVAILABLE_REGIONS_QUERY,
+      variables: { search: args.search || null },
       formatter: (data) => data,
     });
   }
@@ -315,6 +343,56 @@ export class RequestHandler {
       formatter: (data) => data,
     });
   }
+
+  /**
+   * Get reports by dynamic filters (sectors, countries, regions with AND/OR logic)
+   * Supports queries like:
+   * - reports containing Germany AND Health sector
+   * - reports containing Germany OR Health sector
+   */
+  async getReportsByFilters(args: ToolArguments) {
+    if (!args.filters) {
+      throw new McpError(ErrorCode.InvalidParams, 'Filters are required');
+    }
+    console.error(`[MCP] Fetching reports with custom filters`);
+    
+    return this.executeQuery({
+      query: GET_REPORTS_BY_FILTERS_QUERY,
+      variables: {
+        count: args.count ?? 25,
+        cursor: args.cursor,
+        orderBy: args.orderBy ?? 'published',
+        orderMode: args.orderMode ?? 'desc',
+        filters: args.filters,
+      },
+      formatter: (data) => data,
+    });
+  }
+
+  /**
+   * Get campaigns by dynamic filters (sectors, countries, regions with AND/OR logic)
+   * Supports queries like:
+   * - campaigns targeting Germany AND Health sector
+   * - campaigns targeting Germany OR Health sector
+   */
+  async getCampaignsByFilters(args: ToolArguments) {
+    if (!args.filters) {
+      throw new McpError(ErrorCode.InvalidParams, 'Filters are required');
+    }
+    console.error(`[MCP] Fetching campaigns with custom filters`);
+    
+    return this.executeQuery({
+      query: GET_CAMPAIGNS_BY_FILTERS_QUERY,
+      variables: {
+        count: args.count ?? 25,
+        cursor: args.cursor,
+        orderBy: args.orderBy ?? 'created_at',
+        orderMode: args.orderMode ?? 'desc',
+        filters: args.filters,
+      },
+      formatter: (data) => data,
+    });
+  }
 }
 
 /**
@@ -323,11 +401,15 @@ export class RequestHandler {
 export const TOOL_HANDLERS: Record<string, keyof RequestHandler> = {
   'get_sector_by_name': 'getSectorByName',
   'list_sectors': 'listSectors',
+  'list_countries': 'listCountries',
+  'list_regions': 'listRegions',
   'get_reports_by_sector': 'getReportsBySector',
   'get_report_types': 'getReportTypes',
   'get_reports_by_type': 'getReportsByType',
+  'get_reports_by_filters': 'getReportsByFilters',
   'get_malware_by_name': 'getMalwareByName',
   'get_campaigns_by_sector': 'getCampaignsBySector',
+  'get_campaigns_by_filters': 'getCampaignsByFilters',
   'get_indicators_by_malware_and_type': 'getIndicatorsByMalwareAndType',
   'get_indicators_by_campaign': 'getIndicatorsByCampaign',
 };
