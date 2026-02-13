@@ -24,6 +24,86 @@ if (!OPENCTI_TOKEN) {
 }
 
 /**
+ * Normalize filter arguments to ensure all required fields exist
+ * This handles cases where clients (like Copilot Studio) omit empty arrays or required fields
+ * 
+ * OpenCTI FilterGroup type:
+ * {
+ *   mode: 'and' | 'or',
+ *   filters: Filter[],
+ *   filterGroups: FilterGroup[]
+ * }
+ */
+function normalizeFilterGroup(filterGroup: any): any {
+  if (!filterGroup || typeof filterGroup !== 'object') {
+    return filterGroup;
+  }
+
+  const normalized = { ...filterGroup };
+
+  // Ensure mode exists (default to 'and' if not specified)
+  if (!normalized.mode) {
+    normalized.mode = 'and';
+  }
+
+  // Ensure filterGroups array exists (required by OpenCTI GraphQL schema)
+  if (!normalized.filterGroups) {
+    normalized.filterGroups = [];
+  }
+
+  // Ensure filters array exists
+  if (!normalized.filters) {
+    normalized.filters = [];
+  }
+
+  // Normalize individual filters to ensure they have mode field
+  if (Array.isArray(normalized.filters)) {
+    normalized.filters = normalized.filters.map((filter: any) => {
+      if (!filter || typeof filter !== 'object') {
+        return filter;
+      }
+      const normalizedFilter = { ...filter };
+      // Ensure filter has mode (default to 'or' for filters as per OpenCTI convention)
+      if (!normalizedFilter.mode) {
+        normalizedFilter.mode = 'or';
+      }
+      return normalizedFilter;
+    });
+  }
+
+  // Recursively normalize nested filterGroups
+  if (Array.isArray(normalized.filterGroups)) {
+    normalized.filterGroups = normalized.filterGroups.map((fg: any) =>
+      normalizeFilterGroup(fg)
+    );
+  }
+
+  return normalized;
+}
+
+/**
+ * Normalize tool arguments to ensure all required fields exist
+ * Applies transformations based on argument structure
+ */
+function normalizeToolArguments(args: any): any {
+  if (!args || typeof args !== 'object') {
+    return args;
+  }
+
+  const normalized = { ...args };
+
+  // If the arguments contain a 'filters' field that looks like a FilterGroup, normalize it
+  if (normalized.filters && typeof normalized.filters === 'object') {
+    normalized.filters = normalizeFilterGroup(normalized.filters);
+  }
+
+  // Handle other potential normalizations here as needed
+  // For example, if you have other tools with similar issues
+
+  return normalized;
+}
+
+/**
  * Improved HTTP transport for MCP Server
  * Properly handles JSON-RPC request/response lifecycle
  */
@@ -367,7 +447,7 @@ class OpenCTIHTTPServer {
       
       try {
         console.error(`[MCP] Tool called: ${toolName}`);
-        console.error(`[MCP] Arguments:`, JSON.stringify(request.params.arguments, null, 2));
+        console.error(`[MCP] Arguments (raw):`, JSON.stringify(request.params.arguments, null, 2));
 
         const handlerMethod = TOOL_HANDLERS[toolName];
 
@@ -377,10 +457,12 @@ class OpenCTIHTTPServer {
 
         console.error(`[MCP] Executing handler: ${handlerMethod}`);
 
-        // Call the appropriate handler method
-        const result = await (this.requestHandler as any)[handlerMethod](
-          request.params.arguments || {}
-        );
+        // Normalize arguments before passing to handler (handles missing filterGroups, etc.)
+        const normalizedArgs = normalizeToolArguments(request.params.arguments || {});
+        console.error(`[MCP] Arguments (normalized):`, JSON.stringify(normalizedArgs, null, 2));
+
+        // Call the appropriate handler method with normalized arguments
+        const result = await (this.requestHandler as any)[handlerMethod](normalizedArgs);
 
         console.error(`[MCP] Successfully processed ${toolName}`);
 
