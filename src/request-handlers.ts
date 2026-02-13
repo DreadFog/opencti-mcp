@@ -6,16 +6,12 @@ import {
   GET_LIST_AVAILABLE_SECTORS_QUERY,
   GET_LIST_AVAILABLE_COUNTRIES_QUERY,
   GET_LIST_AVAILABLE_REGIONS_QUERY,
-  GET_REPORTS_BY_SECTOR_QUERY,
-  GET_REPORTS_BY_TYPE_QUERY,
   GET_REPORTS_TYPES_QUERY,
   GET_REPORTS_BY_FILTERS_QUERY,
-  GET_CAMPAIGNS_BY_SECTOR_QUERY,
   GET_CAMPAIGNS_BY_FILTERS_QUERY,
-  GET_INDICATORS_BY_MALWARE_WITH_TYPE_QUERY,
-  GET_INDICATORS_BY_CAMPAIGN_QUERY,
+  GET_INDICATORS_BY_OBJECT_WITH_TYPE_QUERY,
   GET_MALARE_BY_NAME_QUERY,
-} from "./queries/hunting_queries.js"
+} from "./queries/index.js"
 
 interface QueryConfig {
   query: string;
@@ -99,20 +95,6 @@ export class RequestHandler {
     });
   }
 
-  /**
-   * Get reports by sector ID
-   */
-  async getReportsBySector(args: ToolArguments) {
-    if (!args.sectorId) {
-      throw new McpError(ErrorCode.InvalidParams, 'Sector ID is required');
-    }
-    console.error(`[MCP] Fetching reports for sector: ${args.sectorId}`);
-    return this.executeQuery({
-      query: GET_REPORTS_BY_SECTOR_QUERY,
-      variables: { sectorId: args.sectorId, first: args.first ?? 10 },
-      formatter: (data) => data,
-    });
-  }
 
   /**
    * Get available report types
@@ -126,20 +108,6 @@ export class RequestHandler {
     });
   }
 
-  /**
-   * Get reports by type
-   */
-  async getReportsByType(args: ToolArguments) {
-    if (!args.reportType) {
-      throw new McpError(ErrorCode.InvalidParams, 'Report type is required');
-    }
-    console.error(`[MCP] Fetching reports of type: ${args.reportType}`);
-    return this.executeQuery({
-      query: GET_REPORTS_BY_TYPE_QUERY,
-      variables: { reportType: args.reportType, first: args.first ?? 10 },
-      formatter: (data) => data,
-    });
-  }
 
   /**
    * Get malware by name
@@ -157,67 +125,16 @@ export class RequestHandler {
   }
 
   /**
-   * Get campaigns targeting a specific sector
+   * Get valid indicators for a specific object (malware, campaign, or intrusion set) and indicator type
    */
-  async getCampaignsBySector(args: ToolArguments) {
-    if (!args.sectorId) {
-      throw new McpError(ErrorCode.InvalidParams, 'Sector ID is required');
-    }
-    console.error(`[MCP] Fetching campaigns targeting sector: ${args.sectorId}`);
-    
-    // Build the filters object dynamically
-    const filters = {
-      filterGroups: [
-        {
-          filterGroups: [],
-          filters: [
-            {
-              key: 'regardingOf',
-              mode: 'or',
-              operator: 'eq',
-              values: [
-                {
-                  key: 'relationship_type',
-                  values: ['targets'],
-                },
-                {
-                  key: 'id',
-                  values: [args.sectorId],
-                },
-              ],
-            },
-          ],
-          mode: 'and',
-        },
-      ],
-      filters: [],
-      mode: 'and',
-    };
-
-    return this.executeQuery({
-      query: GET_CAMPAIGNS_BY_SECTOR_QUERY,
-      variables: {
-        count: args.count ?? 10,
-        cursor: args.cursor,
-        orderBy: args.orderBy ?? 'created_at',
-        orderMode: args.orderMode ?? 'desc',
-        filters,
-      },
-      formatter: (data) => data,
-    });
-  }
-
-  /**
-   * Get valid indicators for a specific malware and indicator type
-   */
-  async getIndicatorsByMalwareAndType(args: ToolArguments) {
-    if (!args.malwareId) {
-      throw new McpError(ErrorCode.InvalidParams, 'Malware ID is required');
+  async getIndicatorsByObjectAndType(args: ToolArguments) {
+    if (!args.objectId) {
+      throw new McpError(ErrorCode.InvalidParams, 'Object ID is required');
     }
     if (!args.indicatorType) {
       throw new McpError(ErrorCode.InvalidParams, 'Indicator type is required');
     }
-    console.error(`[MCP] Fetching ${args.indicatorType} indicators for malware: ${args.malwareId}`);
+    console.error(`[MCP] Fetching ${args.indicatorType} indicators for object: ${args.objectId}`);
     
     // Build the filters object dynamically
     const filters = {
@@ -244,7 +161,7 @@ export class RequestHandler {
                 },
                 {
                   key: 'id',
-                  values: [args.malwareId],
+                  values: [args.objectId],
                 },
               ],
               mode: 'or',
@@ -268,71 +185,7 @@ export class RequestHandler {
     };
 
     return this.executeQuery({
-      query: GET_INDICATORS_BY_MALWARE_WITH_TYPE_QUERY,
-      variables: {
-        count: args.count ?? 25,
-        cursor: args.cursor,
-        orderBy: args.orderBy ?? 'created',
-        orderMode: args.orderMode ?? 'desc',
-        filters,
-      },
-      formatter: (data) => data,
-    });
-  }
-
-  /**
-   * Get valid indicators for a specific campaign
-   */
-  async getIndicatorsByCampaign(args: ToolArguments) {
-    if (!args.campaignId) {
-      throw new McpError(ErrorCode.InvalidParams, 'Campaign ID is required');
-    }
-    console.error(`[MCP] Fetching indicators for campaign: ${args.campaignId}`);
-    
-    // Build the filters object dynamically
-    const filters = {
-      mode: 'and',
-      filters: [
-        {
-          key: 'entity_type',
-          values: ['Indicator'],
-          operator: 'eq',
-          mode: 'or',
-        },
-      ],
-      filterGroups: [
-        {
-          mode: 'and',
-          filters: [
-            {
-              key: 'regardingOf',
-              operator: 'eq',
-              values: [
-                {
-                  key: 'relationship_type',
-                  values: ['indicates'],
-                },
-                {
-                  key: 'id',
-                  values: [args.campaignId],
-                },
-              ],
-              mode: 'or',
-            },
-            {
-              key: 'revoked',
-              operator: 'eq',
-              values: ['false'],
-              mode: 'or',
-            },
-          ],
-          filterGroups: [],
-        },
-      ],
-    };
-
-    return this.executeQuery({
-      query: GET_INDICATORS_BY_CAMPAIGN_QUERY,
+      query: GET_INDICATORS_BY_OBJECT_WITH_TYPE_QUERY,
       variables: {
         count: args.count ?? 25,
         cursor: args.cursor,
@@ -403,13 +256,9 @@ export const TOOL_HANDLERS: Record<string, keyof RequestHandler> = {
   'list_sectors': 'listSectors',
   'list_countries': 'listCountries',
   'list_regions': 'listRegions',
-  'get_reports_by_sector': 'getReportsBySector',
   'get_report_types': 'getReportTypes',
-  'get_reports_by_type': 'getReportsByType',
   'get_reports_by_filters': 'getReportsByFilters',
   'get_malware_by_name': 'getMalwareByName',
-  'get_campaigns_by_sector': 'getCampaignsBySector',
   'get_campaigns_by_filters': 'getCampaignsByFilters',
-  'get_indicators_by_malware_and_type': 'getIndicatorsByMalwareAndType',
-  'get_indicators_by_campaign': 'getIndicatorsByCampaign',
+  'get_indicators_by_object_and_type': 'getIndicatorsByObjectAndType',
 };

@@ -49,54 +49,12 @@ export const TOOL_DEFINITIONS = [
       },
     },
   },
-  // Hunting Queries - Reports
-  {
-    name: 'get_reports_by_sector',
-    description: 'Get all reports related to a specific sector',
-    inputSchema: {
-      type: 'object',
-      properties: {
-        sectorId: {
-          type: 'string',
-          description: 'The ID of the sector',
-        },
-        first: {
-          type: 'number',
-          description: 'Maximum number of reports to retrieve',
-          default: 10,
-        },
-      },
-      required: ['sectorId'],
-    },
-  },
   {
     name: 'get_report_types',
     description: 'Get all available report types from OpenCTI',
     inputSchema: {
       type: 'object',
       properties: {},
-    },
-  },
-  {
-    name: 'get_reports_by_type',
-    description: 'Get all reports of a specific type',
-    inputSchema: {
-      type: 'object',
-      properties: {
-        reportType: {
-          type: 'array',
-          items: {
-            type: 'string',
-          },
-          description: 'Array of report types to filter by',
-        },
-        first: {
-          type: 'number',
-          description: 'Maximum number of reports to retrieve',
-          default: 10,
-        },
-      },
-      required: ['reportType'],
     },
   },
   // Hunting Queries - Malware
@@ -115,14 +73,14 @@ export const TOOL_DEFINITIONS = [
     },
   },
   {
-    name: 'get_indicators_by_malware_and_type',
-    description: 'Retrieve the latest valid indicators for a given malware and indicator type',
+    name: 'get_indicators_by_object_and_type',
+    description: 'Retrieve the latest valid indicators for a given object (malware, campaign, or intrusion set) and indicator type',
     inputSchema: {
       type: 'object',
       properties: {
-        malwareId: {
+        objectId: {
           type: 'string',
-          description: 'The ID of the malware',
+          description: 'The ID of the object (malware, campaign, or intrusion set)',
         },
         indicatorType: {
           type: 'string',
@@ -149,42 +107,7 @@ export const TOOL_DEFINITIONS = [
           default: 'desc',
         },
       },
-      required: ['malwareId', 'indicatorType'],
-    },
-  },
-  // Hunting Queries - Campaigns
-  {
-    name: 'get_campaigns_by_sector',
-    description: 'Get all campaigns targeting a specific sector',
-    inputSchema: {
-      type: 'object',
-      properties: {
-        sectorId: {
-          type: 'string',
-          description: 'The ID of the sector',
-        },
-        count: {
-          type: 'number',
-          description: 'Maximum number of campaigns to retrieve',
-          default: 10,
-        },
-        cursor: {
-          type: 'string',
-          description: 'Pagination cursor for retrieving next set of results',
-        },
-        orderBy: {
-          type: 'string',
-          description: 'Field to order results by (e.g., created_at, name)',
-          default: 'created_at',
-        },
-        orderMode: {
-          type: 'string',
-          description: 'Order mode: asc or desc',
-          enum: ['asc', 'desc'],
-          default: 'desc',
-        },
-      },
-      required: ['sectorId'],
+      required: ['objectId', 'indicatorType'],
     },
   },
   // Hunting Queries - Indicators
