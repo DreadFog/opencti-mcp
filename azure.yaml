@@ -1,0 +1,12 @@
+name: opencti-mcp-server
+metadata:
+  template: opencti-mcp-server@0.1.0
+
+services:
+  web:
+    project: .
+    language: ts
+    host: containerapp
+    docker:
+      path: ./Dockerfile
+      context: .

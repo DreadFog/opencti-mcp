@@ -1,27 +1,38 @@
 {
-  "name": "opencti-server",
+  "name": "opencti-mcp-server",
   "version": "0.1.0",
-  "description": "A Model Context Protocol server",
-  "private": true,
+  "description": "Model Context Protocol server for OpenCTI",
   "type": "module",
-  "bin": {
-    "opencti-server": "./build/index.js"
-  },
-  "files": [
-    "build"
-  ],
+  "main": "build/index.js",
   "scripts": {
-    "build": "tsc && node -e \"require('fs').chmodSync('build/index.js', '755')\"",
-    "prepare": "npm run build",
-    "watch": "tsc --watch",
-    "inspector": "npx @modelcontextprotocol/inspector build/index.js"
+    "build": "tsc && node -e \"require('fs').chmodSync('build/index.js', '755')\" && node -e \"require('fs').chmodSync('build/index-http.js', '755')\"",
+    "start": "node build/index.js",
+    "start:http": "node build/index-http.js",
+    "dev": "tsc --watch",
+    "clean": "rm -rf build"
+  },
+  "bin": {
+    "opencti-mcp-server": "./build/index.js"
   },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "0.6.0",
-    "axios": "^1.7.9"
+    "@modelcontextprotocol/sdk": "^0.6.0",
+    "axios": "^1.7.0",
+    "express": "^4.19.0",
+    "cors": "^2.8.5"
   },
   "devDependencies": {
-    "@types/node": "^20.11.24",
-    "typescript": "^5.3.3"
-  }
+    "@types/node": "^20.0.0",
+    "@types/express": "^4.17.21",
+    "@types/cors": "^2.8.17",
+    "typescript": "^5.3.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "opencti",
+    "threat-intelligence"
+  ]
 }

@@ -1,220 +1,201 @@
-export const TOOL_DEFINITIONS = [
-  // Hunting Queries - Sectors
-  {
-    name: 'get_sector_by_name',
-    description: 'Retrieves the sectors corresponding to a given name. Returns their ID',
-    inputSchema: {
-      type: 'object',
-      properties: {
-        name: {
-          type: 'string',
-          description: 'The name of the sector that is being searched',
-        },
-      },
-      required: ['name'],
-    },
-  },
-  {
-    name: 'list_sectors',
-    description: 'List all available sectors',
-    inputSchema: {
-      type: 'object',
-      properties: {},
-    },
-  },
-  // Hunting Queries - Countries & Regions
-  {
-    name: 'list_countries',
-    description: 'List all available countries, optionally filtered by search term (e.g., "France", "Germany")',
-    inputSchema: {
-      type: 'object',
-      properties: {
-        search: {
-          type: 'string',
-          description: 'Optional search term to filter countries (e.g., "France", "United States")',
-        },
-      },
-    },
-  },
-  {
-    name: 'list_regions',
-    description: 'List all available regions, optionally filtered by search term (e.g., "Europe", "Asia")',
-    inputSchema: {
-      type: 'object',
-      properties: {
-        search: {
-          type: 'string',
-          description: 'Optional search term to filter regions (e.g., "Europe", "Middle East")',
-        },
-      },
-    },
-  },
-  {
-    name: 'get_report_types',
-    description: 'Get all available report types from OpenCTI',
-    inputSchema: {
-      type: 'object',
-      properties: {},
-    },
-  },
-  // Hunting Queries - Malware
-  {
-    name: 'get_malware_by_name',
-    description: 'Search for malware by name in OpenCTI',
-    inputSchema: {
-      type: 'object',
-      properties: {
-        search: {
-          type: 'string',
-          description: 'Malware name or search term',
-        },
-      },
-      required: ['search'],
-    },
-  },
-  {
-    name: 'get_indicators_by_object_and_type',
-    description: 'Retrieve the latest valid indicators for a given object (malware, campaign, or intrusion set) and indicator type',
-    inputSchema: {
-      type: 'object',
-      properties: {
-        objectId: {
-          type: 'string',
-          description: 'The ID of the object (malware, campaign, or intrusion set)',
-        },
-        indicatorType: {
-          type: 'string',
-          description: 'The type of indicators (e.g., IPv4-Addr, IPv6-Addr, Domain-Name, URL, File-MD5, File-SHA-256)',
-        },
-        count: {
-          type: 'number',
-          description: 'Maximum number of indicators to retrieve',
-          default: 25,
-        },
-        cursor: {
-          type: 'string',
-          description: 'Pagination cursor for retrieving next set of results',
-        },
-        orderBy: {
-          type: 'string',
-          description: 'Field to order results by (e.g., created, valid_from)',
-          default: 'created',
-        },
-        orderMode: {
-          type: 'string',
-          description: 'Order mode: asc or desc',
-          enum: ['asc', 'desc'],
-          default: 'desc',
-        },
-      },
-      required: ['objectId', 'indicatorType'],
-    },
-  },
-  // Hunting Queries - Indicators
-  {
-    name: 'get_indicators_by_campaign',
-    description: 'Get all valid indicators that indicate a specific campaign',
-    inputSchema: {
-      type: 'object',
-      properties: {
-        campaignId: {
-          type: 'string',
-          description: 'The ID of the campaign',
-        },
-        count: {
-          type: 'number',
-          description: 'Maximum number of indicators to retrieve',
-          default: 25,
-        },
-        cursor: {
-          type: 'string',
-          description: 'Pagination cursor for retrieving next set of results',
-        },
-        orderBy: {
-          type: 'string',
-          description: 'Field to order results by (e.g., created, valid_from)',
-          default: 'created',
-        },
-        orderMode: {
-          type: 'string',
-          description: 'Order mode: asc or desc',
-          enum: ['asc', 'desc'],
-          default: 'desc',
-        },
-      },
-      required: ['campaignId'],
-    },
-  },
-  // Hunting Queries - Generalized Filters
-  {
-    name: 'get_reports_by_filters',
-    description: 'Get reports by dynamic filters (sectors, countries, regions) with AND/OR logic. Supports complex queries like "reports containing Germany AND Health sector" or "reports containing Germany OR Health sector"',
-    inputSchema: {
-      type: 'object',
-      properties: {
-        filters: {
-          type: 'object',
-          description: 'FilterGroup object with mode (and/or) and filters array. Example: {mode: "and", filters: [{key: "objects", values: ["id1", "id2"], operator: "eq"}], filterGroups: []}',
-        },
-        count: {
-          type: 'number',
-          description: 'Maximum number of reports to retrieve',
-          default: 25,
-        },
-        cursor: {
-          type: 'string',
-          description: 'Pagination cursor for retrieving next set of results',
-        },
-        orderBy: {
-          type: 'string',
-          description: 'Field to order results by (e.g., published, created)',
-          default: 'published',
-        },
-        orderMode: {
-          type: 'string',
-          description: 'Order mode: asc or desc',
-          enum: ['asc', 'desc'],
-          default: 'desc',
-        },
-      },
-      required: ['filters'],
-    },
-  },
-  {
-    name: 'get_campaigns_by_filters',
-    description: 'Get campaigns by dynamic filters (sectors, countries, regions) with AND/OR logic. Supports complex queries like "campaigns targeting Germany AND Health sector" or "campaigns targeting Germany OR Health sector"',
-    inputSchema: {
-      type: 'object',
-      properties: {
-        filters: {
-          type: 'object',
-          description: 'FilterGroup object with mode (and/or) and filters array. Example: {mode: "and", filters: [{key: "regardingOf", operator: "eq", values: [{key: "relationship_type", values: ["targets"]}, {key: "id", values: ["id1", "id2"]}]}], filterGroups: []}',
-        },
-        count: {
-          type: 'number',
-          description: 'Maximum number of campaigns to retrieve',
-          default: 25,
-        },
-        cursor: {
-          type: 'string',
-          description: 'Pagination cursor for retrieving next set of results',
-        },
-        orderBy: {
-          type: 'string',
-          description: 'Field to order results by (e.g., created_at, name)',
-          default: 'created_at',
-        },
-        orderMode: {
-          type: 'string',
-          description: 'Order mode: asc or desc',
-          enum: ['asc', 'desc'],
-          default: 'desc',
-        },
-      },
-      required: ['filters'],
-    },
-  },
-  // Hunting Queries - Relationships
+import { McpError, ErrorCode } from '@modelcontextprotocol/sdk/types.js';
+import { AxiosInstance } from 'axios';
+import { ToolArguments } from '../types.js';
+
+// ============================================================================
+// GraphQL Queries
+// ============================================================================
+
+export const STIX_RELATIONSHIPS_DISTRIBUTION_QUERY = `
+query StixRelationshipsDistributionQuery(
+  $field: String!
+  $operation: StatsOperation!
+  $startDate: DateTime
+  $endDate: DateTime
+  $dateAttribute: String
+  $isTo: Boolean
+  $limit: Int
+  $fromOrToId: [String]
+  $elementWithTargetTypes: [String]
+  $fromId: [String]
+  $fromRole: String
+  $fromTypes: [String]
+  $toId: [String]
+  $toRole: String
+  $toTypes: [String]
+  $relationship_type: [String]
+  $confidences: [Int]
+  $search: String
+  $filters: FilterGroup
+  $dynamicFrom: FilterGroup
+  $dynamicTo: FilterGroup
+) {
+  stixRelationshipsDistribution(
+    field: $field
+    operation: $operation
+    startDate: $startDate
+    endDate: $endDate
+    dateAttribute: $dateAttribute
+    isTo: $isTo
+    limit: $limit
+    fromOrToId: $fromOrToId
+    elementWithTargetTypes: $elementWithTargetTypes
+    fromId: $fromId
+    fromRole: $fromRole
+    fromTypes: $fromTypes
+    toId: $toId
+    toRole: $toRole
+    toTypes: $toTypes
+    relationship_type: $relationship_type
+    confidences: $confidences
+    search: $search
+    filters: $filters
+    dynamicFrom: $dynamicFrom
+    dynamicTo: $dynamicTo
+  ) {
+    label
+    value
+    entity {
+      __typename
+      ... on BasicObject {
+        __isBasicObject: __typename
+        id
+        entity_type
+      }
+      ... on BasicRelationship {
+        __isBasicRelationship: __typename
+        id
+        entity_type
+      }
+      ... on StixObject {
+        __isStixObject: __typename
+        representative {
+          main
+        }
+      }
+      ... on StixRelationship {
+        __isStixRelationship: __typename
+        representative {
+          main
+        }
+      }
+      ... on Creator {
+        name
+        id
+      }
+      ... on Group {
+        name
+        id
+      }
+    }
+  }
+}
+`;
+
+// ============================================================================
+// Request Handlers
+// ============================================================================
+
+export class RelationshipHandlers {
+  constructor(private axiosInstance: AxiosInstance) {}
+
+  private async executeQuery(query: string, variables: any): Promise<any> {
+    const response = await this.axiosInstance.post('/graphql', {
+      query,
+      variables,
+    });
+
+    if (!response.data?.data) {
+      throw new McpError(
+        ErrorCode.InternalError,
+        `Invalid response format from OpenCTI: ${JSON.stringify(response.data)}`
+      );
+    }
+
+    return response.data.data;
+  }
+
+  /**
+   * Get STIX relationships distribution with basic filters
+   */
+  async getStixRelationshipsDistribution(args: ToolArguments) {
+    if (!args.field) {
+      throw new McpError(ErrorCode.InvalidParams, 'Field is required');
+    }
+    if (!args.operation) {
+      throw new McpError(ErrorCode.InvalidParams, 'Operation is required');
+    }
+    console.error(`[MCP] Fetching STIX relationships distribution for field: ${args.field}, operation: ${args.operation}`);
+    
+    return this.executeQuery(STIX_RELATIONSHIPS_DISTRIBUTION_QUERY, {
+      field: args.field,
+      operation: args.operation,
+      startDate: args.startDate,
+      endDate: args.endDate,
+      dateAttribute: args.dateAttribute,
+      isTo: args.isTo,
+      limit: args.limit ?? 10,
+      fromOrToId: args.fromOrToId,
+      elementWithTargetTypes: args.elementWithTargetTypes,
+      fromId: args.fromId,
+      fromRole: args.fromRole,
+      fromTypes: args.fromTypes,
+      toId: args.toId,
+      toRole: args.toRole,
+      toTypes: args.toTypes,
+      relationship_type: args.relationship_type,
+      confidences: args.confidences,
+      search: args.search,
+      filters: args.filters,
+      dynamicFrom: null,
+      dynamicTo: null,
+    });
+  }
+
+  /**
+   * Get STIX relationships distribution with dynamic filters on source and destination
+   * WARNING: dynamicFrom and dynamicTo are pre-queries that can match up to 5,000 entities each
+   */
+  async getStixRelationshipsDistributionWithDynamicFilters(args: ToolArguments) {
+    if (!args.field) {
+      throw new McpError(ErrorCode.InvalidParams, 'Field is required');
+    }
+    if (!args.operation) {
+      throw new McpError(ErrorCode.InvalidParams, 'Operation is required');
+    }
+    console.error(`[MCP] Fetching STIX relationships distribution with dynamic filters for field: ${args.field}, operation: ${args.operation}`);
+    
+    return this.executeQuery(STIX_RELATIONSHIPS_DISTRIBUTION_QUERY, {
+      field: args.field,
+      operation: args.operation,
+      startDate: args.startDate,
+      endDate: args.endDate,
+      dateAttribute: args.dateAttribute,
+      isTo: args.isTo,
+      limit: args.limit ?? 10,
+      fromOrToId: args.fromOrToId,
+      elementWithTargetTypes: args.elementWithTargetTypes,
+      fromId: args.fromId,
+      fromRole: args.fromRole,
+      fromTypes: args.fromTypes,
+      toId: args.toId,
+      toRole: args.toRole,
+      toTypes: args.toTypes,
+      relationship_type: args.relationship_type,
+      confidences: args.confidences,
+      search: args.search,
+      filters: args.filters,
+      dynamicFrom: args.dynamicFrom,
+      dynamicTo: args.dynamicTo,
+    });
+  }
+}
+
+// ============================================================================
+// Tool Definitions
+// ============================================================================
+
+export const RELATIONSHIP_TOOLS = [
   {
     name: 'get_stix_relationships_distribution',
     description: 'Get STIX relationships distribution with basic filters. Use this tool for simple relationship searches without complex filters on the source or destination of relationships. Example use-case: get the malwares most used by a specific intrusion set, or get the intrusion sets that target the most a sector. For complex source/destination filters, use get_stix_relationships_distribution_with_dynamic_filters instead.',
@@ -416,3 +397,12 @@ export const TOOL_DEFINITIONS = [
     },
   },
 ] as const;
+
+// ============================================================================
+// Handler Mapping
+// ============================================================================
+
+export const RELATIONSHIP_HANDLER_MAP: Record<string, keyof RelationshipHandlers> = {
+  'get_stix_relationships_distribution': 'getStixRelationshipsDistribution',
+  'get_stix_relationships_distribution_with_dynamic_filters': 'getStixRelationshipsDistributionWithDynamicFilters',
+};
