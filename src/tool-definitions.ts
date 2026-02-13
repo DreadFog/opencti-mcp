@@ -214,4 +214,205 @@ export const TOOL_DEFINITIONS = [
       required: ['filters'],
     },
   },
+  // Hunting Queries - Relationships
+  {
+    name: 'get_stix_relationships_distribution',
+    description: 'Get STIX relationships distribution with basic filters. Use this tool for simple relationship searches without complex filters on the source or destination of relationships. Example use-case: get the malwares most used by a specific intrusion set, or get the intrusion sets that target the most a sector. For complex source/destination filters, use get_stix_relationships_distribution_with_dynamic_filters instead.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        field: {
+          type: 'string',
+          description: 'Field to group relationships by (e.g., "internal_id", "entity_type")',
+        },
+        operation: {
+          type: 'string',
+          description: 'Statistical operation to perform (e.g., "count")',
+          enum: ['count', 'sum', 'avg', 'min', 'max'],
+        },
+        startDate: {
+          type: 'string',
+          description: 'Start date for filtering relationships (ISO 8601 format)',
+        },
+        endDate: {
+          type: 'string',
+          description: 'End date for filtering relationships (ISO 8601 format)',
+        },
+        dateAttribute: {
+          type: 'string',
+          description: 'Date attribute to filter on (e.g., "created_at", "updated_at")',
+        },
+        isTo: {
+          type: 'boolean',
+          description: 'Filter relationships by direction (true for "to", false for "from")',
+        },
+        limit: {
+          type: 'number',
+          description: 'Maximum number of results to retrieve',
+          default: 10,
+        },
+        fromOrToId: {
+          type: 'array',
+          items: { type: 'string' },
+          description: 'Filter by entity IDs (either source or destination)',
+        },
+        elementWithTargetTypes: {
+          type: 'array',
+          items: { type: 'string' },
+          description: 'Filter by target entity types',
+        },
+        fromId: {
+          type: 'array',
+          items: { type: 'string' },
+          description: 'Filter by source entity IDs',
+        },
+        fromRole: {
+          type: 'string',
+          description: 'Filter by source entity role',
+        },
+        fromTypes: {
+          type: 'array',
+          items: { type: 'string' },
+          description: 'Filter by source entity types',
+        },
+        toId: {
+          type: 'array',
+          items: { type: 'string' },
+          description: 'Filter by destination entity IDs',
+        },
+        toRole: {
+          type: 'string',
+          description: 'Filter by destination entity role',
+        },
+        toTypes: {
+          type: 'array',
+          items: { type: 'string' },
+          description: 'Filter by destination entity types',
+        },
+        relationship_type: {
+          type: 'array',
+          items: { type: 'string' },
+          description: 'Filter by relationship types (e.g., "targets", "uses")',
+        },
+        confidences: {
+          type: 'array',
+          items: { type: 'number' },
+          description: 'Filter by confidence levels',
+        },
+        search: {
+          type: 'string',
+          description: 'Free text search on relationships',
+        },
+        filters: {
+          type: 'object',
+          description: 'FilterGroup object for complex filtering on the relationships themselves',
+        },
+      },
+      required: ['field', 'operation'],
+    },
+  },
+  {
+    name: 'get_stix_relationships_distribution_with_dynamic_filters',
+    description: 'Get STIX relationships distribution with dynamic filters on source and destination entities. WARNING: dynamicFrom and dynamicTo are pre-queries that can match up to 5,000 entities each, so they must be precise queries to avoid performance issues. Use this tool only when you need complex filters on the source (dynamicFrom) or destination (dynamicTo) of relationships. Example use-case: "What are the chinese intrusion sets that target the most the Health sector?". as we need to filter for specific intrusion sets, a dynamicfrom filter is required to specify that we need intrusion sets, and that they originate from china.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        field: {
+          type: 'string',
+          description: 'Field to group relationships by (e.g., "internal_id", "entity_type")',
+        },
+        operation: {
+          type: 'string',
+          description: 'Statistical operation to perform (e.g., "count")',
+          enum: ['count', 'sum', 'avg', 'min', 'max'],
+        },
+        startDate: {
+          type: 'string',
+          description: 'Start date for filtering relationships (ISO 8601 format)',
+        },
+        endDate: {
+          type: 'string',
+          description: 'End date for filtering relationships (ISO 8601 format)',
+        },
+        dateAttribute: {
+          type: 'string',
+          description: 'Date attribute to filter on (e.g., "created_at", "updated_at")',
+        },
+        isTo: {
+          type: 'boolean',
+          description: 'Filter relationships by direction (true for "to", false for "from")',
+        },
+        limit: {
+          type: 'number',
+          description: 'Maximum number of results to retrieve',
+          default: 10,
+        },
+        fromOrToId: {
+          type: 'array',
+          items: { type: 'string' },
+          description: 'Filter by entity IDs (either source or destination)',
+        },
+        elementWithTargetTypes: {
+          type: 'array',
+          items: { type: 'string' },
+          description: 'Filter by target entity types',
+        },
+        fromId: {
+          type: 'array',
+          items: { type: 'string' },
+          description: 'Filter by source entity IDs',
+        },
+        fromRole: {
+          type: 'string',
+          description: 'Filter by source entity role',
+        },
+        fromTypes: {
+          type: 'array',
+          items: { type: 'string' },
+          description: 'Filter by source entity types',
+        },
+        toId: {
+          type: 'array',
+          items: { type: 'string' },
+          description: 'Filter by destination entity IDs',
+        },
+        toRole: {
+          type: 'string',
+          description: 'Filter by destination entity role',
+        },
+        toTypes: {
+          type: 'array',
+          items: { type: 'string' },
+          description: 'Filter by destination entity types',
+        },
+        relationship_type: {
+          type: 'array',
+          items: { type: 'string' },
+          description: 'Filter by relationship types (e.g., "targets", "uses")',
+        },
+        confidences: {
+          type: 'array',
+          items: { type: 'number' },
+          description: 'Filter by confidence levels',
+        },
+        search: {
+          type: 'string',
+          description: 'Free text search on relationships',
+        },
+        filters: {
+          type: 'object',
+          description: 'FilterGroup object for complex filtering on the relationships themselves',
+        },
+        dynamicFrom: {
+          type: 'object',
+          description: 'FilterGroup for dynamic filtering on source entities. WARNING: This can match up to 5,000 entities - ensure it is a precise query.',
+        },
+        dynamicTo: {
+          type: 'object',
+          description: 'FilterGroup for dynamic filtering on destination entities. WARNING: This can match up to 5,000 entities - ensure it is a precise query.',
+        },
+      },
+      required: ['field', 'operation'],
+    },
+  },
 ] as const;

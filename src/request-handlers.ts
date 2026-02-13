@@ -11,6 +11,7 @@ import {
   GET_CAMPAIGNS_BY_FILTERS_QUERY,
   GET_INDICATORS_BY_OBJECT_WITH_TYPE_QUERY,
   GET_MALARE_BY_NAME_QUERY,
+  STIX_RELATIONSHIPS_DISTRIBUTION_QUERY,
 } from "./queries/index.js"
 
 interface QueryConfig {
@@ -246,6 +247,89 @@ export class RequestHandler {
       formatter: (data) => data,
     });
   }
+
+  /**
+   * Get STIX relationships distribution with basic filters
+   */
+  async getStixRelationshipsDistribution(args: ToolArguments) {
+    if (!args.field) {
+      throw new McpError(ErrorCode.InvalidParams, 'Field is required');
+    }
+    if (!args.operation) {
+      throw new McpError(ErrorCode.InvalidParams, 'Operation is required');
+    }
+    console.error(`[MCP] Fetching STIX relationships distribution for field: ${args.field}, operation: ${args.operation}`);
+    
+    return this.executeQuery({
+      query: STIX_RELATIONSHIPS_DISTRIBUTION_QUERY,
+      variables: {
+        field: args.field,
+        operation: args.operation,
+        startDate: args.startDate,
+        endDate: args.endDate,
+        dateAttribute: args.dateAttribute,
+        isTo: args.isTo,
+        limit: args.limit ?? 10,
+        fromOrToId: args.fromOrToId,
+        elementWithTargetTypes: args.elementWithTargetTypes,
+        fromId: args.fromId,
+        fromRole: args.fromRole,
+        fromTypes: args.fromTypes,
+        toId: args.toId,
+        toRole: args.toRole,
+        toTypes: args.toTypes,
+        relationship_type: args.relationship_type,
+        confidences: args.confidences,
+        search: args.search,
+        filters: args.filters,
+        dynamicFrom: null,
+        dynamicTo: null,
+      },
+      formatter: (data) => data,
+    });
+  }
+
+  /**
+   * Get STIX relationships distribution with dynamic filters on source and destination
+   * WARNING: dynamicFrom and dynamicTo are pre-queries that can match up to 5,000 entities each
+   */
+  async getStixRelationshipsDistributionWithDynamicFilters(args: ToolArguments) {
+    if (!args.field) {
+      throw new McpError(ErrorCode.InvalidParams, 'Field is required');
+    }
+    if (!args.operation) {
+      throw new McpError(ErrorCode.InvalidParams, 'Operation is required');
+    }
+    console.error(`[MCP] Fetching STIX relationships distribution with dynamic filters for field: ${args.field}, operation: ${args.operation}`);
+    
+    return this.executeQuery({
+      query: STIX_RELATIONSHIPS_DISTRIBUTION_QUERY,
+      variables: {
+        field: args.field,
+        operation: args.operation,
+        startDate: args.startDate,
+        endDate: args.endDate,
+        dateAttribute: args.dateAttribute,
+        isTo: args.isTo,
+        limit: args.limit ?? 10,
+        fromOrToId: args.fromOrToId,
+        elementWithTargetTypes: args.elementWithTargetTypes,
+        fromId: args.fromId,
+        fromRole: args.fromRole,
+        fromTypes: args.fromTypes,
+        toId: args.toId,
+        toRole: args.toRole,
+        toTypes: args.toTypes,
+        relationship_type: args.relationship_type,
+        confidences: args.confidences,
+        search: args.search,
+        filters: args.filters,
+        dynamicFrom: args.dynamicFrom,
+        dynamicTo: args.dynamicTo,
+      },
+      formatter: (data) => data,
+    });
+  }
 }
 
 /**
@@ -261,4 +345,6 @@ export const TOOL_HANDLERS: Record<string, keyof RequestHandler> = {
   'get_malware_by_name': 'getMalwareByName',
   'get_campaigns_by_filters': 'getCampaignsByFilters',
   'get_indicators_by_object_and_type': 'getIndicatorsByObjectAndType',
+  'get_stix_relationships_distribution': 'getStixRelationshipsDistribution',
+  'get_stix_relationships_distribution_with_dynamic_filters': 'getStixRelationshipsDistributionWithDynamicFilters',
 };

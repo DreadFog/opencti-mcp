@@ -30,3 +30,8 @@ export {
   GET_LIST_AVAILABLE_COUNTRIES_QUERY,
   GET_LIST_AVAILABLE_REGIONS_QUERY,
 } from './geography_queries.js';
+
+// Relationships queries
+export {
+  STIX_RELATIONSHIPS_DISTRIBUTION_QUERY,
+} from './relationships.js';
