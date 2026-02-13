@@ -9,8 +9,8 @@ import {
 } from '@modelcontextprotocol/sdk/types.js';
 import axios from 'axios';
 import https from 'https';
-import { TOOL_DEFINITIONS } from './tool-definitions.js';
-import { RequestHandler, TOOL_HANDLERS } from './request-handlers.js';
+import { ALL_TOOLS } from './entities/index.js';
+import { RequestHandler, TOOL_HANDLERS } from './request-handler.js';
 
 // Environment configuration
 const OPENCTI_URL = process.env.OPENCTI_URL || 'http://localhost:8080';
@@ -72,7 +72,7 @@ class OpenCTIServer {
   private setupHandlers() {
     // List tools handler
     this.server.setRequestHandler(ListToolsRequestSchema, async () => ({
-      tools: TOOL_DEFINITIONS,
+      tools: ALL_TOOLS,
     }));
 
     // Call tool handler
